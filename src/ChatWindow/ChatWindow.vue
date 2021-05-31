@@ -277,8 +277,8 @@ export default {
 		deleteMessage(message) {
 			this.$emit('delete-message', { message, roomId: this.room.roomId })
 		},
-		openFile({ message, action }) {
-			this.$emit('open-file', { message, action })
+		openFile({ message, index, action }) {
+			this.$emit('open-file', { message, index, action })
 		},
 		openUserTag({ user }) {
 			this.$emit('open-user-tag', { user })

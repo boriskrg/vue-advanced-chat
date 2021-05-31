@@ -1,41 +1,46 @@
 <template>
 	<div ref="imageRef" class="vac-image-container">
-		<loader
-			:style="{ top: `${imageResponsive.loaderTop}px` }"
-			:show="isImageLoading"
-		/>
-		<div
-			class="vac-message-image"
-			:class="{
+    <div class="vac-message-images-container">
+      <div
+        v-for="(file, fileIndex) in message.files"
+        :key="'message_' + message._id + '_' + fileIndex"
+        class="vac-message-image"
+        @click.stop="imageClick($event, file, fileIndex)"
+        :class="{
 				'vac-image-loading':
-					isImageLoading && message.senderId === currentUserId
+					isImageLoading(file) && message.senderId === currentUserId
 			}"
-			:style="{
-				'background-image': `url('${imageBackground}')`,
-				'max-height': `${imageResponsive.maxHeight}px`
+        :style="{
+				'background-image': `url('${imageBackground(file)}')`,
+				// 'max-height': `${imageResponsive.maxHeight}px`
 			}"
-		>
-			<transition name="vac-fade-image">
-				<div v-if="imageHover && !isImageLoading" class="vac-image-buttons">
-					<div
-						class="vac-svg-button vac-button-view"
-						@click.stop="$emit('open-file', 'preview')"
-					>
-						<slot name="eye-icon">
-							<svg-icon name="eye" />
-						</slot>
-					</div>
-					<div
-						class="vac-svg-button vac-button-download"
-						@click.stop="$emit('open-file', 'download')"
-					>
-						<slot name="document-icon">
-							<svg-icon name="document" />
-						</slot>
-					</div>
-				</div>
-			</transition>
-		</div>
+      >
+        <loader
+          :style="{ top: `${imageResponsive.loaderTop}px` }"
+          :show="isImageLoading(file)"
+        />
+        <transition name="vac-fade-image">
+          <div v-if="imageHover && !isImageLoading(file)" class="vac-image-buttons">
+            <div
+              class="vac-svg-button vac-button-view"
+              @click.stop="$event.stopPropagation; $emit('open-file', fileIndex, 'preview')"
+            >
+              <slot name="eye-icon">
+                <svg-icon name="eye" />
+              </slot>
+            </div>
+            <div
+              class="vac-svg-button vac-button-download"
+              @click.stop="$event.stopPropagation; $emit('open-file', 'download')"
+            >
+              <slot name="document-icon">
+                <svg-icon name="document" />
+              </slot>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </div>
 		<format-message
 			:content="message.content"
 			:users="roomUsers"
@@ -77,19 +82,6 @@ export default {
 		}
 	},
 
-	computed: {
-		isImageLoading() {
-			return (
-				this.message.file.url.indexOf('blob:http') !== -1 || this.imageLoading
-			)
-		},
-		imageBackground() {
-			return this.isImageLoading
-				? this.message.file.preview || this.message.file.url
-				: this.message.file.url
-		}
-	},
-
 	watch: {
 		message: {
 			immediate: true,
@@ -100,13 +92,28 @@ export default {
 	},
 
 	mounted() {
-		this.imageResponsive = {
-			maxHeight: this.$refs.imageRef.clientWidth - 18,
-			loaderTop: this.$refs.imageRef.clientWidth / 2
-		}
+
 	},
 
 	methods: {
+    // imageResponsive() = {
+    //   maxHeight: this.$refs.imageRef.clientWidth - 18,
+    //   loaderTop: this.$refs.imageRef.clientWidth / 2
+    // },
+    isImageLoading(file) {
+      return (
+        file.url.indexOf('blob:http') !== -1 || this.imageLoading
+      )
+    },
+    imageClick($event, file, fileIndex) {
+      $event.stopPropagation()
+      this.$emit('open-file', fileIndex, 'image-click')
+    },
+    imageBackground(file) {
+      return this.isImageLoading
+        ? file.preview || file.url
+        : file.url
+    },
 		checkImgLoad() {
 			if (!isImageFile(this.message.file)) return
 			this.imageLoading = true

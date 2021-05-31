@@ -143,180 +143,187 @@
 				@select-user-tag="selectUserTag($event)"
 			/>
 
-			<div
-				class="vac-box-footer"
-				:class="{
+      <div class="vac-footer-wrapper">
+        <div class="vac-files-container" v-if="imageFile.length">
+          <div v-for="(fileLocalUrl, fileIndex) in imageFile"
+               :key="'image_files_' + fileIndex"
+               class="vac-media-container"
+          >
+            <div class="vac-svg-button vac-icon-media" @click="resetMediaFile(fileIndex)">
+              <slot name="image-close-icon">
+                <svg-icon name="close" param="image" />
+              </slot>
+            </div>
+            <div class="vac-media-file">
+              <img ref="mediaFile" :src="fileLocalUrl" @load="onMediaLoad" />
+            </div>
+          </div>
+<!--          <div v-else-if="videoFile" class="vac-media-container">-->
+<!--            <div class="vac-svg-button vac-icon-media" @click="resetMediaFile">-->
+<!--              <slot name="image-close-icon">-->
+<!--                <svg-icon name="close" param="image" />-->
+<!--              </slot>-->
+<!--            </div>-->
+<!--            <div ref="mediaFile" class="vac-media-file">-->
+<!--              <video width="100%" height="100%" controls>-->
+<!--                <source :src="videoFile" />-->
+<!--              </video>-->
+<!--            </div>-->
+<!--          </div>-->
+
+<!--          <div-->
+<!--            v-else-if="file"-->
+<!--            class="vac-file-container"-->
+<!--            :class="{ 'vac-file-container-edit': editedMessage._id }"-->
+<!--          >-->
+<!--            <div class="vac-icon-file">-->
+<!--              <slot name="file-icon">-->
+<!--                <svg-icon name="file" />-->
+<!--              </slot>-->
+<!--            </div>-->
+<!--            <div class="vac-file-message">-->
+<!--              {{ file.audio ? file.name : message }}-->
+<!--            </div>-->
+<!--            <div-->
+<!--              class="vac-svg-button vac-icon-remove"-->
+<!--              @click="resetMessage(null, true)"-->
+<!--            >-->
+<!--              <slot name="file-close-icon">-->
+<!--                <svg-icon name="close" />-->
+<!--              </slot>-->
+<!--            </div>-->
+<!--          </div>-->
+        </div>
+        <div
+          class="vac-box-footer"
+          :class="{
 					'vac-app-box-shadow': filteredEmojis.length || filteredUsersTag.length
 				}"
-			>
-				<div
-					v-if="showAudio && !imageFile && !videoFile"
-					class="vac-icon-textarea-left"
-				>
-					<template v-if="isRecording">
-						<div
-							class="vac-svg-button vac-icon-audio-stop"
-							@click="stopRecorder"
-						>
-							<slot name="audio-stop-icon">
-								<svg-icon name="close-outline" />
-							</slot>
-						</div>
+        >
+          <div
+            v-if="showAudio && !imageFile.length && !videoFile"
+            class="vac-icon-textarea-left"
+          >
+            <template v-if="isRecording">
+              <div
+                class="vac-svg-button vac-icon-audio-stop"
+                @click="stopRecorder"
+              >
+                <slot name="audio-stop-icon">
+                  <svg-icon name="close-outline" />
+                </slot>
+              </div>
 
-						<div class="vac-dot-audio-record" />
+              <div class="vac-dot-audio-record" />
 
-						<div class="vac-dot-audio-record-time">
-							{{ recordedTime }}
-						</div>
+              <div class="vac-dot-audio-record-time">
+                {{ recordedTime }}
+              </div>
 
-						<div
-							class="vac-svg-button vac-icon-audio-confirm"
-							@click="toggleRecorder(false)"
-						>
-							<slot name="audio-stop-icon">
-								<svg-icon name="checkmark" />
-							</slot>
-						</div>
-					</template>
+              <div
+                class="vac-svg-button vac-icon-audio-confirm"
+                @click="toggleRecorder(false)"
+              >
+                <slot name="audio-stop-icon">
+                  <svg-icon name="checkmark" />
+                </slot>
+              </div>
+            </template>
 
-					<div v-else class="vac-svg-button" @click="toggleRecorder(true)">
-						<slot name="microphone-icon">
-							<svg-icon name="microphone" class="vac-icon-microphone" />
-						</slot>
-					</div>
-				</div>
+            <div v-else class="vac-svg-button" @click="toggleRecorder(true)">
+              <slot name="microphone-icon">
+                <svg-icon name="microphone" class="vac-icon-microphone" />
+              </slot>
+            </div>
+          </div>
 
-				<div v-if="imageFile" class="vac-media-container">
-					<div class="vac-svg-button vac-icon-media" @click="resetMediaFile">
-						<slot name="image-close-icon">
-							<svg-icon name="close" param="image" />
-						</slot>
-					</div>
-					<div class="vac-media-file">
-						<img ref="mediaFile" :src="imageFile" @load="onMediaLoad" />
-					</div>
-				</div>
-
-				<div v-else-if="videoFile" class="vac-media-container">
-					<div class="vac-svg-button vac-icon-media" @click="resetMediaFile">
-						<slot name="image-close-icon">
-							<svg-icon name="close" param="image" />
-						</slot>
-					</div>
-					<div ref="mediaFile" class="vac-media-file">
-						<video width="100%" height="100%" controls>
-							<source :src="videoFile" />
-						</video>
-					</div>
-				</div>
-
-				<div
-					v-else-if="file"
-					class="vac-file-container"
-					:class="{ 'vac-file-container-edit': editedMessage._id }"
-				>
-					<div class="vac-icon-file">
-						<slot name="file-icon">
-							<svg-icon name="file" />
-						</slot>
-					</div>
-					<div class="vac-file-message">
-						{{ file.audio ? file.name : message }}
-					</div>
-					<div
-						class="vac-svg-button vac-icon-remove"
-						@click="resetMessage(null, true)"
-					>
-						<slot name="file-close-icon">
-							<svg-icon name="close" />
-						</slot>
-					</div>
-				</div>
-
-				<textarea
-					v-show="!file || imageFile || videoFile"
-					ref="roomTextarea"
-					v-model="message"
-					:placeholder="textMessages.TYPE_MESSAGE"
-					class="vac-textarea"
-					:class="{
+          <textarea
+            v-show="!file || imageFile || videoFile"
+            ref="roomTextarea"
+            v-model="message"
+            :placeholder="textMessages.TYPE_MESSAGE"
+            class="vac-textarea"
+            :class="{
 						'vac-textarea-outline': editedMessage._id
 					}"
-					:style="{
+            :style="{
 						'min-height': `${mediaDimensions ? mediaDimensions.height : 20}px`,
 						'padding-left': `${
 							mediaDimensions ? mediaDimensions.width - 10 : 12
 						}px`
 					}"
-					@input="onChangeInput"
-					@keydown.esc="escapeTextarea"
-					@keydown.enter.exact.prevent=""
-				/>
+            @input="onChangeInput"
+            @keydown.esc="escapeTextarea"
+            @keydown.enter.exact.prevent=""
+          />
 
-				<div class="vac-icon-textarea">
-					<div
-						v-if="editedMessage._id"
-						class="vac-svg-button"
-						@click="resetMessage"
-					>
-						<slot name="edit-close-icon">
-							<svg-icon name="close-outline" />
-						</slot>
-					</div>
+          <div class="vac-icon-textarea">
+            <div
+              v-if="editedMessage._id"
+              class="vac-svg-button"
+              @click="resetMessage"
+            >
+              <slot name="edit-close-icon">
+                <svg-icon name="close-outline" />
+              </slot>
+            </div>
 
-					<emoji-picker
-						v-if="showEmojis && (!file || imageFile || videoFile)"
-						:emoji-opened="emojiOpened"
-						:position-top="true"
-						@add-emoji="addEmoji"
-						@open-emoji="emojiOpened = $event"
-					>
-						<template v-for="(i, name) in $scopedSlots" #[name]="data">
-							<slot :name="name" v-bind="data" />
-						</template>
-					</emoji-picker>
+            <emoji-picker
+              v-if="showEmojis && (!file || imageFile || videoFile)"
+              :emoji-opened="emojiOpened"
+              :position-top="true"
+              @add-emoji="addEmoji"
+              @open-emoji="emojiOpened = $event"
+            >
+              <template v-for="(i, name) in $scopedSlots" #[name]="data">
+                <slot :name="name" v-bind="data" />
+              </template>
+            </emoji-picker>
 
-					<div
-						v-if="showFiles"
-						class="vac-svg-button"
-						@click="launchFilePicker"
-					>
-						<slot name="paperclip-icon">
-							<svg-icon name="paperclip" />
-						</slot>
-					</div>
+            <div
+              v-if="showFiles"
+              class="vac-svg-button"
+              @click="launchFilePicker"
+            >
+              <slot name="paperclip-icon">
+                <svg-icon name="paperclip" />
+              </slot>
+            </div>
 
-					<div
-						v-if="textareaAction"
-						class="vac-svg-button"
-						@click="textareaActionHandler"
-					>
-						<slot name="custom-action-icon">
-							<svg-icon name="deleted" />
-						</slot>
-					</div>
+            <div
+              v-if="textareaAction"
+              class="vac-svg-button"
+              @click="textareaActionHandler"
+            >
+              <slot name="custom-action-icon">
+                <svg-icon name="deleted" />
+              </slot>
+            </div>
 
-					<input
-						v-if="showFiles"
-						ref="file"
-						type="file"
-						:accept="acceptedFiles"
-						style="display:none"
-						@change="onFileChange($event.target.files)"
-					/>
+            <input
+              v-if="showFiles"
+              ref="file"
+              multiple
+              type="file"
+              :accept="acceptedFiles"
+              style="display:none"
+              @change="onFileChange($event.target.files)"
+            />
 
-					<div
-						v-if="showSendIcon"
-						class="vac-svg-button"
-						:class="{ 'vac-send-disabled': isMessageEmpty }"
-						@click="sendMessage"
-					>
-						<slot name="send-icon">
-							<svg-icon name="send" :param="isMessageEmpty ? 'disabled' : ''" />
-						</slot>
-					</div>
-				</div>
-			</div>
+            <div
+              v-if="showSendIcon"
+              class="vac-svg-button"
+              :class="{ 'vac-send-disabled': isMessageEmpty }"
+              @click="sendMessage"
+            >
+              <slot name="send-icon">
+                <svg-icon name="send" :param="isMessageEmpty ? 'disabled' : ''" />
+              </slot>
+            </div>
+          </div>
+        </div>
+      </div>
+
 		</div>
 	</div>
 </template>
@@ -397,7 +404,8 @@ export default {
 			loadingMessages: false,
 			loadingMoreMessages: false,
 			file: null,
-			imageFile: null,
+			files: [],
+			imageFile: [],
 			videoFile: null,
 			mediaDimensions: null,
 			fileDialog: false,
@@ -448,7 +456,7 @@ export default {
 			return this.messages.length && this.messagesLoaded
 		},
 		isMessageEmpty() {
-			return !this.file && !this.message.trim()
+			return !this.files.length && !this.message.trim()
 		},
 		recordedTime() {
 			return new Date(this.recorder.duration * 1000).toISOString().substr(14, 5)
@@ -760,16 +768,17 @@ export default {
 			this.editedMessage = {}
 			this.messageReply = null
 			this.file = null
+			this.files = []
 			this.mediaDimensions = null
-			this.imageFile = null
+			this.imageFile = []
 			this.videoFile = null
 			this.emojiOpened = false
 			this.preventKeyboardFromClosing()
 			setTimeout(() => this.focusTextarea(disableMobileFocus))
 		},
-		resetMediaFile() {
-			this.mediaDimensions = null
-			this.imageFile = null
+		resetMediaFile(fileIndex) {
+      this.imageFile.splice(fileIndex, 1)
+      this.mediaDimensions = null
 			this.videoFile = null
 			this.editedMessage.file = null
 			this.file = null
@@ -800,7 +809,7 @@ export default {
 		sendMessage() {
 			let message = this.message.trim()
 
-			if (!this.file && !message) return
+			if (!this.files.length && !message) return
 
 			this.selectedUsersTag.forEach(user => {
 				message = message.replace(
@@ -810,11 +819,12 @@ export default {
 			})
 
 			if (this.editedMessage._id) {
-				if (this.editedMessage.content !== message || this.file) {
+				if (this.editedMessage.content !== message || this.files.length) {
 					this.$emit('edit-message', {
 						messageId: this.editedMessage._id,
 						newContent: message,
-						file: this.file,
+						file: this.files[0],
+						files: this.files,
 						replyMessage: this.messageReply,
 						usersTag: this.selectedUsersTag
 					})
@@ -822,7 +832,8 @@ export default {
 			} else {
 				this.$emit('send-message', {
 					content: message,
-					file: this.file,
+					file: this.files[0],
+					files: this.files,
 					replyMessage: this.messageReply,
 					usersTag: this.selectedUsersTag
 				})
@@ -877,7 +888,7 @@ export default {
 			this.file = message.file
 
 			if (isImageFile(this.file)) {
-				this.imageFile = message.file.url
+				this.imageFile = message.file.url // TODO: handle edit
 				setTimeout(() => this.onMediaLoad())
 			} else if (isVideoFile(this.file)) {
 				this.videoFile = message.file.url
@@ -928,30 +939,32 @@ export default {
 			this.fileDialog = true
 			this.resetMediaFile()
 
-			const file = files[0]
-			const fileURL = URL.createObjectURL(file)
-			const blobFile = await fetch(fileURL).then(res => res.blob())
-			const typeIndex = file.name.lastIndexOf('.')
+      // heh...
+      Promise.all(Array.from(files).map(async file => {
+        const fileURL = URL.createObjectURL(file)
+        const blobFile = await fetch(fileURL).then(res => res.blob())
+        const typeIndex = file.name.lastIndexOf('.')
 
-			this.file = {
-				blob: blobFile,
-				name: file.name.substring(0, typeIndex),
-				size: file.size,
-				type: file.type,
-				extension: file.name.substring(typeIndex + 1),
-				localUrl: fileURL
-			}
+        return {
+          blob: blobFile,
+          fullName: file.name,
+          name: file.name.substring(0, typeIndex),
+          extension: file.name.substring(typeIndex + 1),
+          size: file.size,
+          type: file.type,
+          localUrl: fileURL
+        }
+      })).then(fileItems => {
+        fileItems.forEach(file => {
+          if (isImageFile(file)) {
+            this.imageFile.push(file.localUrl)
+          }
+        })
 
-			if (isImageFile(this.file)) {
-				this.imageFile = fileURL
-			} else if (isVideoFile(this.file)) {
-				this.videoFile = fileURL
-				setTimeout(() => this.onMediaLoad(), 50)
-			} else {
-				this.message = file.name
-			}
+        this.files = fileItems
 
-			setTimeout(() => (this.fileDialog = false), 500)
+        setTimeout(() => (this.fileDialog = false), 500)
+      })
 		},
 		initRecorder() {
 			this.isRecording = false
@@ -1005,8 +1018,8 @@ export default {
 				}
 			}
 		},
-		openFile({ message, action }) {
-			this.$emit('open-file', { message, action })
+		openFile({ message, index, action }) {
+			this.$emit('open-file', { message, index, action })
 		},
 		openUserTag(user) {
 			this.$emit('open-user-tag', user)
@@ -1236,10 +1249,11 @@ export default {
 	}
 
 	.vac-media-container {
-		position: absolute;
-		max-width: 25%;
-		left: 16px;
-		top: 18px;
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 5px;
+    overflow: hidden;
 	}
 
 	.vac-media-file {
@@ -1249,7 +1263,6 @@ export default {
 		min-height: 30px;
 
 		img {
-			border-radius: 15px;
 			width: 100%;
 			max-width: 150px;
 			max-height: 100%;
@@ -1369,11 +1382,6 @@ export default {
 			}
 		}
 
-		.vac-media-container {
-			top: 10px;
-			left: 10px;
-		}
-
 		.vac-media-file {
 			img,
 			video {
@@ -1397,5 +1405,23 @@ export default {
 			bottom: 70px;
 		}
 	}
+}
+.vac-files-container {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+}
+//.vac-col-messages .vac-media-container img {
+//  border-radius: 0;
+//}
+//.vac-col-messages .vac-media-container {
+//  position: relative;
+//  width: 150px;
+//  height: 150px;
+//  margin: 0 8px 8px 0;
+//  overflow: hidden;
+//}
+.vac-footer-wrapper {
+  border-top: 1px solid #1111;
 }
 </style>

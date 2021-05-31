@@ -69,7 +69,7 @@
 						</div>
 
 						<format-message
-							v-else-if="!message.file"
+							v-else-if="!message.files || (message.files && !message.files.length)"
 							:content="message.content"
 							:users="roomUsers"
 							:text-formatting="textFormatting"
@@ -208,12 +208,14 @@ import MessageActions from './MessageActions'
 import MessageReactions from './MessageReactions'
 import AudioPlayer from './AudioPlayer'
 
+import { isImageFile, isVideoFile, isAudioFile } from '../../utils/media-file'
+
 const { messagesValidation } = require('../../utils/data-validation')
-const {
-	isImageFile,
-	isVideoFile,
-	isAudioFile
-} = require('../../utils/media-file')
+// const {
+// 	isImageFile,
+// 	isVideoFile,
+// 	isAudioFile
+// } = require('../../utils/media-file')
 
 export default {
 	name: 'Message',
@@ -279,7 +281,7 @@ export default {
 			)
 		},
 		isImage() {
-			return isImageFile(this.message.file)
+			return isImageFile(this.message.files[0])
 		},
 		isVideo() {
 			return isVideoFile(this.message.file)
@@ -335,8 +337,8 @@ export default {
 			if (!this.optionsOpened && !this.emojiOpened) this.messageHover = false
 			this.hoverMessageId = null
 		},
-		openFile(action) {
-			this.$emit('open-file', { message: this.message, action })
+		openFile(index, action) {
+			this.$emit('open-file', { message: this.message, index, action })
 		},
 		openUserTag(user) {
 			this.$emit('open-user-tag', { user })
