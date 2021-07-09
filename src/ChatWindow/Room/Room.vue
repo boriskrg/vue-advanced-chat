@@ -194,7 +194,11 @@
 <!--            </div>-->
 <!--          </div>-->
         </div>
+        <div class="vac-box-footer-slot">
+          <slot name="room-footer"></slot>
+        </div>
         <div
+          v-if="room.active"
           class="vac-box-footer"
           :class="{
 					'vac-app-box-shadow': filteredEmojis.length || filteredUsersTag.length
